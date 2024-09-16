@@ -1,0 +1,21 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import axios from 'axios';
+import { MovieApiResponse } from '../../types/Movie';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { type = 'popular', page = 1 } = req.query;
+  const TMDB_API_KEY = process.env.TMDB_API_KEY;
+
+  try {
+    const response = await axios.get<MovieApiResponse>(`https://api.themoviedb.org/3/movie/${type}`, {
+      params: {
+        api_key: TMDB_API_KEY,
+        language: 'en-US',
+        page,
+      },
+    });
+    res.status(200).json(response.data);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching movies from TMDb', error });
+  }
+}
